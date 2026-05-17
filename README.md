@@ -1,17 +1,23 @@
 ## STIFFCHAOS
-### ROSENBROCK INTEGRATION ENGINE FOR STIFF SYSTEMS AND CHAOTIC DYNAMICS
+### ROSENBROCK 3-STAGE SOLVER FOR STIFF SYSTEMS AND CHAOTIC DYNAMICS
 
-StiffChaos-C is a solver based on the 3-stage Rosenbrock method (ROS3), this solver is engineered for the deterministic resolution of stiff Ordinary Differential Equations (ODEs) and multi-scale kinetics. Simulation of chaotic systems, with a visualisation of how the trajectory colonises the attractor space using Plotly:
+StiffChaos-C is an experimental implementation of a 3-stage Rosenbrock (ROS3) solver for stiff ordinary differential equations and chaotic dynamical systems. The project focuses on numerical stability, adaptive step-size control and deterministic execution under constrained memory conditions.
 
-![Halvorsen Attractor](gallery/halvorsen.gif)
+![Four Wings Attractor](gallery/fourwings.gif)
 
-### Features
+## Why this matters
 
-- Implicit error control (using a two-stage embedded method)
-- Dynamic step size calculated based on the error-to-tolerance ratio
-- Zero-Heap Architecture constraint
-- No dynamic memory allocation (`malloc/free`)
-- Static memory footprint designed for bare-metal deployment and real-time embedded systems
+Many physical and chemical systems evolve across widely different time scales, making explicit integration methods unstable or inefficient.
+
+Implicit Rosenbrock methods provide a practical compromise between stability and computational cost, especially in environments where deterministic execution and bounded memory usage are important.
+
+### Design Goals
+
+* Implicit error control (using a two-stage embedded method)
+* Dynamic step size calculated based on the error-to-tolerance ratio
+* No dynamic memory allocation (`malloc/free`)
+* Static memory footprint
+* Designed with embedded and bare-metal constraints in mind
 
 ---
 
@@ -45,43 +51,21 @@ make
 
 ---
 
-### The Robertson System
+### Numerical Stability: The Robertson System
 
 The system models kinetic reactions in which the reaction rate changes drastically, whilst obeying a linear conservation law:
 
-```math
-X + Y + Z = 1
-```
-
 The Robertson system is frequently used to assess the stability of time integrators, given its extreme stiffness and the ability to measure the actual numerical drift using only the values of the three variables.
 
-### Differential Equations
+  * $$\frac{dX}{dt} = -0.04X + 10^4YZ$$
+  * $$\frac{dY}{dt} = 0.04X - 10^4YZ - 3 \cdot 10^7Y^2$$
+  * $$\frac{dZ}{dt} = 3 \cdot 10^7Y^2$$
+  * Initial Conditions $$[X(0),Y(0),Z(0)]^T = [1.0,\ 0.0,\ 0.0]^T$$
+  * Conservation Invariant:  $$X + Y + Z = 1.0$$.
 
-```math
-\frac{dX}{dt} = -0.04X + 10^4YZ
-```
+The Robertson problem is used as a stability benchmark due to its extreme stiffness and conserved quantity.
 
-```math
-\frac{dY}{dt} = 0.04X - 10^4YZ - 3 \cdot 10^7Y^2
-```
-
-```math
-\frac{dZ}{dt} = 3 \cdot 10^7Y^2
-```
-
-### Initial Conditions
-
-```math
-[1.0,\ 0.0,\ 0.0]^T
-```
-
-### Conservation Invariant
-
-```math
-X + Y + Z = 1.0
-```
-
-Using Robertson’s stiff scheme as the primary method for assessing the stability of the method, a deviation of the order of $10^{-12}$ in the conservation invariant is observed after 10^{8} accepted steps.
+After $$10^8$$ accepted steps, the observed drift in the conservation invariant remains on the order of $$10^{-12}$$.
 
 ---
 
